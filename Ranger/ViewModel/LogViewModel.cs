@@ -11,17 +11,17 @@ namespace Ranger.ViewModel
         private readonly ApiService _apiService = new();
 
         [ObservableProperty]
-        private ObservableCollection<LogDateDto> _logDates = new();
+        private ObservableCollection<string> _logDates = new();
 
         [RelayCommand]
         private async Task LoadLogDatesAsync()
         {
             var response = await _apiService.GetAviableLogDatesAsync();
 
-            if (response.Status != "Success")
+            if (response.Status != "OK")
                 return;
 
-            LogDates = new ObservableCollection<LogDateDto>(response.Data);
+            LogDates = new ObservableCollection<string>(response.Data.Dates);
         }
     }
 }

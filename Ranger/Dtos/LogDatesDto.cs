@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace Ranger.Dtos
 {
-    internal class LogDateDto
+    internal class LogDatesDto
     {
-        public string Date { get; set; }
+        public List<string> Dates { get; set; }
     }
+
 }

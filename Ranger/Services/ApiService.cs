@@ -23,15 +23,16 @@ namespace Ranger.Services
             };
         }
 
-        public async Task<ApiResponseDto<List<LogDateDto>>> GetAviableLogDatesAsync()
+        public async Task<ApiResponseDto<LogDatesDto>> GetAviableLogDatesAsync() => await GetRequestAsync<LogDatesDto>("dev/logs");
+
+        private async Task<ApiResponseDto<T>> GetRequestAsync<T>(string route)
         {
-            var response = await _client.GetAsync("dev/logs");
+            var response = await _client.GetAsync(route);
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
-            
-            return JsonSerializer.Deserialize<ApiResponseDto<List<LogDateDto>>>(json) ?? throw new Exception("Invalid API response");
+
+            return JsonSerializer.Deserialize<ApiResponseDto<T>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? throw new Exception("Invalid API response");
         }
-        
     }
 }
