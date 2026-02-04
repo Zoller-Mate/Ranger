@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -18,7 +19,7 @@ namespace Ranger.Services
         {
             _client = new HttpClient
             {
-                BaseAddress = new Uri("http://localhost:3000/api/v0")
+                BaseAddress = new Uri("http://localhost:3000/api/v0/")
             };
         }
 
@@ -28,7 +29,8 @@ namespace Ranger.Services
             response.EnsureSuccessStatusCode();
 
             var json = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<ApiResponseDto<List<LogDateDto>>>(json);
+            
+            return JsonSerializer.Deserialize<ApiResponseDto<List<LogDateDto>>>(json) ?? throw new Exception("Invalid API response");
         }
         
     }
