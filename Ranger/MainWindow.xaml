@@ -5,8 +5,28 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ranger"
         mc:Ignorable="d"
+        xmlns:viewModel="clr-namespace:Ranger.ViewModel"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
 
+    <Window.DataContext>
+        <viewModel:MainViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Margin="6">
+            <RadioButton Content="Log"
+                      IsChecked="True"
+                      Command="{Binding LogViewCommand}"
+                      Style="{StaticResource MenuButtonTheme}"></RadioButton>
+            <RadioButton Content="Database" Style="{StaticResource MenuButtonTheme}"></RadioButton>
+        </StackPanel>
+
+        <ContentControl Grid.Column="1"
+                     Margin="5"
+                     Content="{Binding CurrentView}"/>
     </Grid>
 </Window>
