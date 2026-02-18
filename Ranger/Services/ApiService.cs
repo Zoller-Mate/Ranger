@@ -24,6 +24,7 @@ namespace Ranger.Services
         }
 
         public async Task<ApiResponseDto<LogDatesDto>> GetAviableLogDatesAsync() => await GetRequestAsync<LogDatesDto>("dev/logs");
+        public async Task<ApiResponseDto<LogsDto>> GetLogsByDateAsync(string date) => await GetRequestAsync<LogsDto>($"dev/logs/{date}");
 
         private async Task<ApiResponseDto<T>> GetRequestAsync<T>(string route)
         {
