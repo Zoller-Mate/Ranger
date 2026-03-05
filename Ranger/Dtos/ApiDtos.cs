@@ -1,9 +1,7 @@
-﻿using System;
+﻿
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Ranger.Dtos
 {
@@ -30,5 +28,11 @@ namespace Ranger.Dtos
         public string Path { get; set; }
         public int StatusCode { get; set; }
         public string ResponseTime { get; set; }
+    }
+
+    internal class DatabaseDumpDto
+    {
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement> Tables { get; set; }
     }
 }

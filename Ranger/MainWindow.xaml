@@ -22,7 +22,9 @@
                       IsChecked="True"
                       Command="{Binding LogViewCommand}"
                       Style="{StaticResource MenuButtonTheme}"></RadioButton>
-            <RadioButton Content="Database" Style="{StaticResource MenuButtonTheme}"></RadioButton>
+            <RadioButton Content="Database"
+						 Style="{StaticResource MenuButtonTheme}"
+						 Command="{Binding DatabaseViewCommand}"></RadioButton>
         </StackPanel>
 
         <ContentControl Grid.Column="1"

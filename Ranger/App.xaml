@@ -15,7 +15,11 @@
             <DataTemplate DataType="{x:Type viewModel:LogViewModel}">
                 <view:LogView/>
             </DataTemplate>
-            
+
+            <DataTemplate DataType="{x:Type viewModel:DatabaseViewModel}">
+                <view:DatabaseView/>
+            </DataTemplate>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

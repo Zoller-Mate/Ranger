@@ -11,22 +11,20 @@
         <viewModel:LogViewModel/>
     </UserControl.DataContext>
     <Grid>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition Height="45"/>
-            </Grid.RowDefinitions>
-            <DataGrid ItemsSource="{Binding Logs}"
-                      CanUserAddRows="False"
-                      CanUserResizeColumns="False"/>
-            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <ComboBox Width="100"
-                          ItemsSource="{Binding LogDates}"
-                          SelectedItem="{Binding SelectedLogDate}">
-                </ComboBox>
-                <Button Content="Refresh" Command="{Binding LoadLogDatesCommand}"/>
-                <Button Content="Save as"/>
-            </StackPanel>
-        </Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="45"/>
+        </Grid.RowDefinitions>
+        <DataGrid ItemsSource="{Binding Logs}"
+                    CanUserAddRows="False"
+                    CanUserResizeColumns="False"/>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <ComboBox Width="100"
+                        ItemsSource="{Binding LogDates}"
+                        SelectedItem="{Binding SelectedLogDate}">
+            </ComboBox>
+            <Button Content="Refresh" Command="{Binding LoadLogDatesCommand}"/>
+            <Button Content="Save as"/>
+        </StackPanel>
     </Grid>
 </UserControl>
