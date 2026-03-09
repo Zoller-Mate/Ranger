@@ -25,7 +25,7 @@ namespace Ranger.Services
 
         public async Task<ApiResponseDto<LogDatesDto>> GetAviableLogDatesAsync() => await GetRequestAsync<LogDatesDto>("dev/logs");
         public async Task<ApiResponseDto<LogsDto>> GetLogsByDateAsync(string date) => await GetRequestAsync<LogsDto>($"dev/logs/{date}");
-        public async Task<ApiResponseDto<DatabaseDumpDto>> GetDatabaseDumpAsync() => await GetRequestAsync<DatabaseDumpDto>($"dev/databasedump");
+        public async Task<ApiResponseDto<DatabaseDto>> GetDatabaseDumpAsync() => await GetRequestAsync<DatabaseDto>($"dev/databasedump");
 
         private async Task<ApiResponseDto<T>> GetRequestAsync<T>(string route)
         {
@@ -34,7 +34,9 @@ namespace Ranger.Services
 
             var json = await response.Content.ReadAsStringAsync();
 
-            return JsonSerializer.Deserialize<ApiResponseDto<T>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? throw new Exception("Invalid API response");
+            var ASDF = JsonSerializer.Deserialize<ApiResponseDto<T>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? throw new Exception("Invalid API response");
+
+            return ASDF;
         }
     }
 }

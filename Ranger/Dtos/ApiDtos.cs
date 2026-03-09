@@ -30,9 +30,4 @@ namespace Ranger.Dtos
         public string ResponseTime { get; set; }
     }
 
-    internal class DatabaseDumpDto
-    {
-        [JsonExtensionData]
-        public Dictionary<string, JsonElement> Tables { get; set; }
-    }
 }
