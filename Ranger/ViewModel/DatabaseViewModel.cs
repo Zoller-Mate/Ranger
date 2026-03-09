@@ -20,10 +20,10 @@ namespace Ranger.ViewModel
         private readonly ApiService _apiService = new();
 
         [ObservableProperty]
-        private ObservableCollection<TableViewModel> _tables = new();
+        private ObservableCollection<object> _tables = new();
 
         [ObservableProperty]
-        private TableViewModel? _selectedTable;
+        private object? _selectedTable;
 
 
 
@@ -38,78 +38,46 @@ namespace Ranger.ViewModel
                 return;
 
             Tables.Clear();
-            MessageBox.Show(response.Data.ChatMembers.First().ChatId);
-            
-            /*
-            foreach (var (tableName, tableData) in response.Data.)
+
+            // Végigmegyünk a DatabaseDto összes property-jén
+            var dataProperties = response.Data.GetType().GetProperties();
+
+            foreach (var prop in dataProperties)
             {
+                var value = prop.GetValue(response.Data);
+                if (value == null) continue;
 
-                var rawJson = tableData.GetRawText();
-                MessageBox.Show($"Tábla: {tableName}\nJSON: {rawJson}");
+                var listType = value.GetType();
+                /*/ Ellenőrizzük, hogy List<T> típusú-e
+                if (!listType.IsGenericType || listType.GetGenericTypeDefinition() != typeof(List<>))
+                    continue;*/
 
-                var dictRows = JsonSerializer.Deserialize<List<Dictionary<string, JsonElement>>>(
-                    tableData.GetRawText(),
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
-                );
+                // Megszerezzük a lista item típusát (pl. UserDto, CampDto stb.)
+                var itemType = listType.GetGenericArguments()[0];
 
-                // ExpandoObject-re alakítás, hogy működjön a dataGrid
-                var expandoRows = dictRows?.Select(dict =>
-                {
-                    var expando = new ExpandoObject() as IDictionary<string, object>;
-                    foreach (var kvp in dict)
-                    {
-                        expando[kvp.Key] = ConvertJsonElement(kvp.Value);
-                    }
-                    if (dictRows == null)
-                    {
-                        // Itt logolhatsz vagy breakpointot tehetsz
-                        MessageBox.Show($"A {tableName} tábla deszerializálása sikertelen vagy üres.");
-                    }
-                    return (dynamic)expando;
-                }).ToList() ?? new List<dynamic>();
+                // Létrehozzuk a TableViewModel<T> objektumot a megfelelő típussal
+                var tableViewModelType = typeof(TableViewModel<>).MakeGenericType(itemType);
+                var tableViewModel = Activator.CreateInstance(tableViewModelType);
 
+                // Beállítjuk a property-ket
+                tableViewModelType.GetProperty("TableName")?.SetValue(tableViewModel, prop.Name);
+                tableViewModelType.GetProperty("Rows")?.SetValue(tableViewModel, value);
 
-                var tableVm = new TableViewModel
-                {
-                    TableName = tableName,
-                    Rows = expandoRows
-                };
-
-
-                MessageBox.Show($"Tábla: {tableName}\nSorok száma: {expandoRows.Count}\nElső sor típusa: {expandoRows.FirstOrDefault()?.GetType().Name}");
-
-
-                Tables.Add(tableVm);
+                Tables.Add(tableViewModel);
             }
 
             SelectedTable = Tables.FirstOrDefault();
-            */
         }
-
-        /* JsonElement konverzió megfelelő típusra
-        private static object ConvertJsonElement(JsonElement element)
-        {
-            return element.ValueKind switch
-            {
-                JsonValueKind.String => element.GetString() ?? string.Empty,
-                JsonValueKind.Number => element.TryGetInt64(out var l) ? l : element.GetDouble(),
-                JsonValueKind.True => true,
-                JsonValueKind.False => false,
-                JsonValueKind.Null => "NULL",
-                JsonValueKind.Undefined => string.Empty,
-                _ => element.ToString()
-            };
-        }*/
     }
 
     // Egy tábla
-    internal partial class TableViewModel : ObservableObject
+    internal partial class TableViewModel<T> : ObservableObject
     {
         [ObservableProperty]
         private string _tableName = string.Empty;
 
         // List elég, mert mindig az egész objektet cseréljük, nem módosítjuk egyesével az elemeket
         [ObservableProperty]
-        private List<dynamic> _rows = new List<dynamic>();
+        private List<T> _rows = new List<T>();
     }
 }
