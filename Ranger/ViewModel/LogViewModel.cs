@@ -3,6 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using Ranger.Dtos;
 using Ranger.Services;
 using System.Collections.ObjectModel;
+using Microsoft.Win32;
+using System.IO;
+using System.Text;
+using System.Windows;
 
 namespace Ranger.ViewModel
 {
@@ -51,6 +55,65 @@ namespace Ranger.ViewModel
                 return;
 
             Logs = new List<Log>(response.Data.Logs);
+        }
+
+        [RelayCommand]
+        private async Task LogsSaveAsAsync()
+        {
+            // Ellenőrizzük, hogy vannak-e logok
+            if (!Logs.Any())
+            {
+                MessageBox.Show("No logs to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // SaveFileDialog konfigurálása
+            SaveFileDialog saveLogDialog = new SaveFileDialog
+            {
+                Filter = "Log files (*.log)|*.log|Text files (*.txt)|*.txt|All files (*.*)|*.*",
+                DefaultExt = "log",
+                FileName = $"{SelectedLogDate}.log" // Alapértelmezett fájlnév a kiválasztott dátum alapján
+            };
+
+            // Dialog megjelenítése
+            if (saveLogDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    // Log objektumok formázása szöveggé
+                    var logLines = Logs.Select(log => FormatLogEntry(log)).ToList();
+
+                    // Szöveg összeállítása
+                    var logContent = string.Join(Environment.NewLine, logLines);
+
+                    // Fájl írása aszinkron módon
+                    await File.WriteAllTextAsync(saveLogDialog.FileName, logContent, Encoding.UTF8);
+
+                    // Sikeres mentés üzenete
+                    MessageBox.Show($"Logs saved successfully to:\n{saveLogDialog.FileName}","Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    // Hiba esetén hibaüzenet
+                    MessageBox.Show($"Error saving file:\n{ex.Message}","Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private string FormatLogEntry(Log log)
+        {
+            return $"[{log.Timestamp}] [{log.Method}] {log.Path} {log.StatusCode} - {log.ResponseTime}";
+        }
+
+        public LogViewModel()
+        {
+            InitializeAsync();
+        }
+
+        private async void InitializeAsync()
+        {
+            await LoadLogDatesCommand.ExecuteAsync(null);
+            if (LogDates.Any()) SelectedLogDate = LogDates.First();
         }
     }
 }

@@ -12,6 +12,9 @@ using Ranger.Dtos;
 using CommunityToolkit.Mvvm.Input;
 using System.Dynamic;
 using System.Windows;
+using Microsoft.Win32;
+using System.IO;
+using ClosedXML.Excel;
 
 namespace Ranger.ViewModel
 {
@@ -68,6 +71,127 @@ namespace Ranger.ViewModel
 
             SelectedTable = Tables.FirstOrDefault();
         }
+
+        [RelayCommand]
+        private async Task DatabaseSaveAsAsync()
+        {
+            if (!Tables.Any())
+            {
+                MessageBox.Show("No database tables to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            SaveFileDialog saveDialog = new SaveFileDialog
+            {
+                Filter = "Excel files (*.xlsx)|*.xlsx",
+                DefaultExt = "xlsx",
+                FileName = $"database_dump_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.xlsx"
+            };
+
+            if (saveDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    await SaveAsExcelAsync(saveDialog.FileName);
+                    MessageBox.Show($"Database saved successfully to:\n{saveDialog.FileName}","Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error saving file:\n{ex.Message}","Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+        
+
+        private async Task SaveAsExcelAsync(string fileName)
+        {
+            await Task.Run(() =>
+            {
+                using var workbook = new XLWorkbook();
+
+                foreach (var table in Tables)
+                {
+                    var tableName = table.GetType().GetProperty("TableName")?.GetValue(table) as string;
+                    var rows = table.GetType().GetProperty("Rows")?.GetValue(table);
+
+                    if (!string.IsNullOrEmpty(tableName) && rows != null)
+                    {
+                        // Érvényes munkalap név biztosítása (Excel korlátok miatt)
+                        var safeSheetName = GetSafeSheetName(tableName);
+                        var worksheet = workbook.Worksheets.Add(safeSheetName);
+
+                        if (rows is IEnumerable<object> enumerable)
+                        {
+                            var rowList = enumerable.ToList();
+                            if (rowList.Any())
+                            {
+                                // Header sor
+                                var firstRow = rowList.First();
+                                var properties = firstRow.GetType().GetProperties();
+
+                                for (int i = 0; i < properties.Length; i++)
+                                {
+                                    worksheet.Cell(1, i + 1).Value = properties[i].Name;
+                                    worksheet.Cell(1, i + 1).Style.Font.Bold = true;
+                                    worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightGray;
+                                }
+
+                                // Adat sorok
+                                int currentRow = 2;
+                                foreach (var row in rowList)
+                                {
+                                    for (int i = 0; i < properties.Length; i++)
+                                    {
+                                        var value = properties[i].GetValue(row);
+                                        worksheet.Cell(currentRow, i + 1).Value = value?.ToString() ?? "";
+                                    }
+                                    currentRow++;
+                                }
+
+                                // Auto-fit oszlopok
+                                worksheet.ColumnsUsed().AdjustToContents();
+                            }
+                            else
+                            {
+                                worksheet.Cell(1, 1).Value = "";
+                            }
+                        }
+                    }
+                }
+
+                // Ha nincs adat, adj hozzá egy üres lapot
+                if (!workbook.Worksheets.Any())
+                {
+                    workbook.Worksheets.Add("Empty");
+                }
+
+                workbook.SaveAs(fileName);
+            });
+        }
+
+        private string GetSafeSheetName(string name)
+        {
+            // Excel munkalap név korlátok: max 31 karakter, nem tartalmazhat: \ / ? * [ ]
+            var safeName = name;
+            var invalidChars = new char[] { '\\', '/', '?', '*', '[', ']', ':' };
+
+            foreach (var c in invalidChars)
+            {
+                safeName = safeName.Replace(c, '_');
+            }
+
+            if (safeName.Length > 31)
+                safeName = safeName.Substring(0, 31);
+
+            return safeName;
+        }
+
+
+        public DatabaseViewModel()
+        {
+            LoadDatabaseDumpCommand.ExecuteAsync(null);
+        }
+
     }
 
     // Egy tábla

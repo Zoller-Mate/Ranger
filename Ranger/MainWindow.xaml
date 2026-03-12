@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:Ranger"
         mc:Ignorable="d"
         xmlns:viewModel="clr-namespace:Ranger.ViewModel"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Ranger Desktop" Height="450" Width="800"
+        Icon="pack://application:,,,/Resources/RangerIcon.ico">
 
     <Window.DataContext>
         <viewModel:MainViewModel/>
@@ -20,11 +21,11 @@
         <StackPanel Margin="6">
             <RadioButton Content="Log"
                       IsChecked="True"
-                      Command="{Binding LogViewCommand}"
+                      Command="{Binding ShowLogViewCommand}"
                       Style="{StaticResource MenuButtonTheme}"></RadioButton>
             <RadioButton Content="Database"
 						 Style="{StaticResource MenuButtonTheme}"
-						 Command="{Binding DatabaseViewCommand}"></RadioButton>
+						 Command="{Binding ShowDatabaseViewCommand}"></RadioButton>
         </StackPanel>
 
         <ContentControl Grid.Column="1"

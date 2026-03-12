@@ -18,12 +18,12 @@ namespace Ranger.ViewModel
         [RelayCommand]
         private void ShowLogView() => CurrentView = LogVm;
         [RelayCommand]
-        private void ShowDatabaseView() => MessageBox.Show("dfs");
+        private void ShowDatabaseView() => CurrentView = databaseVm;
 
 
         public MainViewModel()
         {
-            CurrentView = databaseVm;
+            CurrentView = LogVm;
         }
     }
 }

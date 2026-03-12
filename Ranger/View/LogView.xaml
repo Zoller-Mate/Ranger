@@ -24,7 +24,7 @@
                         SelectedItem="{Binding SelectedLogDate}">
             </ComboBox>
             <Button Content="Refresh" Command="{Binding LoadLogDatesCommand}"/>
-            <Button Content="Save as"/>
+            <Button Content="Save as" Command="{Binding LogsSaveAsCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>
