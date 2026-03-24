@@ -31,7 +31,7 @@
         <Setter Property="AlternationCount" Value="2"/>
 
         <!-- COLUMNS -->
-        <Setter Property="ColumnWidth" Value="Auto"/>
+        <Setter Property="ColumnWidth" Value="*"/>
         <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
     </Style>
 

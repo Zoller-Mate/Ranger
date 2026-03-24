@@ -15,7 +15,8 @@
             <RowDefinition/>
             <RowDefinition Height="45"/>
         </Grid.RowDefinitions>
-        <DataGrid ItemsSource="{Binding Logs}"/>
+        <DataGrid ItemsSource="{Binding Logs}"
+                  ColumnWidth="*"/>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
             <ComboBox Width="100"
                         ItemsSource="{Binding LogDates}"
