@@ -121,7 +121,7 @@
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="SortDirection" Value="Ascending">
-                            <Setter TargetName="SortDownIcon" Property="Fill" Value="{DynamicResource }"
+                            <Setter TargetName="SortDownIcon" Property="Fill" Value="{DynamicResource }"></Setter>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
