@@ -16,7 +16,8 @@
             <RowDefinition Height="45"/>
         </Grid.RowDefinitions>
         <TabControl ItemsSource="{Binding Tables}"
-                    SelectedItem="{Binding SelectedTable}">
+                    SelectedItem="{Binding SelectedTable}"
+                    x:Name="MainTabs">
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding TableName}" 
@@ -27,7 +28,7 @@
             <TabControl.ContentTemplate>
                 <DataTemplate>
                     <DataGrid ItemsSource="{Binding Rows}"
-                              local:DataGridAutoResizeBehavior.Enable="True"/>
+                              local:DataGridAutoResizeBehavior.HostTab="{Binding ElementName=MainTabs}"/>
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>

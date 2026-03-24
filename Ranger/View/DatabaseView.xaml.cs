@@ -29,59 +29,49 @@ namespace Ranger.View
 
     public static class DataGridAutoResizeBehavior
     {
-        public static bool GetEnable(DependencyObject obj)
-            => (bool)obj.GetValue(EnableProperty);
+        public static TabControl GetHostTab(DependencyObject obj)
+            => (TabControl)obj.GetValue(HostTabProperty);
 
-        public static void SetEnable(DependencyObject obj, bool value)
-            => obj.SetValue(EnableProperty, value);
+        public static void SetHostTab(DependencyObject obj, TabControl value)
+            => obj.SetValue(HostTabProperty, value);
 
-        public static readonly DependencyProperty EnableProperty =
+        public static readonly DependencyProperty HostTabProperty =
             DependencyProperty.RegisterAttached(
-                "Enable",
-                typeof(bool),
+                "HostTab",
+                typeof(TabControl),
                 typeof(DataGridAutoResizeBehavior),
-                new PropertyMetadata(false, OnEnableChanged));
+                new PropertyMetadata(null, OnChanged));
 
-        private static void OnEnableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private static void OnChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is not DataGrid grid || !(bool)e.NewValue)
+            if (d is not DataGrid grid)
                 return;
 
-            grid.Loaded += (s, _) => Resize(grid);
+            // első betöltés
+            grid.Loaded += (_, __) => TryResize(grid);
 
-            // 🔥 KERESSÜK MEG A TABCONTROLT
-            var tab = FindParent<TabControl>(grid);
-            if (tab != null)
+            // tab váltás
+            if (e.NewValue is TabControl tab)
             {
-                tab.SelectionChanged += (s, _) =>
-                {
-                    if (grid.IsVisible)
-                        Resize(grid);
-                };
+                tab.SelectionChanged += (_, __) => TryResize(grid);
             }
         }
 
-        private static void Resize(DataGrid grid)
+        private static void TryResize(DataGrid grid)
         {
-            if (grid.Columns.Count == 0) return;
-
-            foreach (var col in grid.Columns)
-                col.Width = DataGridLength.Auto;
-
-            grid.Columns.Last().Width =
-                new DataGridLength(1, DataGridLengthUnitType.Star);
-        }
-
-        private static T FindParent<T>(DependencyObject child) where T : DependencyObject
-        {
-            while (child != null)
+            // 🔥 EZ A LÉNYEG: várunk amíg van szélesség
+            grid.Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (child is T parent)
-                    return parent;
+                if (grid.ActualWidth == 0 || grid.Columns.Count == 0)
+                    return;
 
-                child = System.Windows.Media.VisualTreeHelper.GetParent(child);
-            }
-            return null;
+                foreach (var col in grid.Columns)
+                    col.Width = DataGridLength.Auto;
+
+                grid.Columns[^1].Width =
+                    new DataGridLength(1, DataGridLengthUnitType.Star);
+
+            }), DispatcherPriority.Render); // <-- FONTOS!
         }
     }
 }
