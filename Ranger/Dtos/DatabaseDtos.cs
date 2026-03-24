@@ -14,8 +14,8 @@ namespace Ranger.Dtos
         public string PhoneNumber { get; set; }
         public string EmergencyContact { get; set; }
         public string PasswordResetAt { get; set; }
+        public bool? Validated { get; set; }
     }
-
     // User online status tábla
     internal class UserOnlineStatusDto
     {
@@ -145,6 +145,14 @@ namespace Ranger.Dtos
         public bool IsPaid { get; set; }
     }
 
+    // Register Tokens tábla
+    internal class RegisterTokenDto
+    {
+        public string UserId { get; set; }
+        public string Token { get; set; }
+        public string ExpiresAt { get; set; }
+    }
+
     // Teljes adatbázis wrapper
     internal class DatabaseDto
     {
@@ -159,6 +167,7 @@ namespace Ranger.Dtos
         public List<RoomDto> Rooms { get; set; }
         public List<PasswordResetDto> PasswordResets { get; set; }
         public List<TokenDto> Tokens { get; set; }
+        public List<RegisterTokenDto> RegisterTokens { get; set; }
         public List<LocationDto> Locations { get; set; }
         public List<PaymentDto> Payments { get; set; }
         public List<UserPaymentDto> UserPayments { get; set; }
