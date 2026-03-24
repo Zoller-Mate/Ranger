@@ -9,9 +9,9 @@
         <ResourceDictionary>
             
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Theme/MenuButtonTheme.xaml"/>
+                <ResourceDictionary Source="/Theme/MenuButtonTheme.xaml"/>
                 <ResourceDictionary Source="/Theme/DataGridTheme.xaml"/>
-                <ResourceDictionary Source="/Resources/Icons.xaml"/>
+                <ResourceDictionary Source="/Theme/TabControlTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <DataTemplate DataType="{x:Type viewModel:LogViewModel}">
