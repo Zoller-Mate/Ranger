@@ -27,6 +27,10 @@ namespace Ranger.View
         }
     }
 
+    /*
+     * Ez a responzivitás miatt kell... viszont ezzel sem lesz olvasható csak méreteződik, és mondhatjuk hogy responziv...
+     * Ha minWidth be van állítva, akkor nem is kell...
+     * 
     public static class DataGridAutoResizeBehavior
     {
         public static TabControl GetHostTab(DependencyObject obj)
@@ -73,5 +77,5 @@ namespace Ranger.View
 
             }), DispatcherPriority.Render); // <-- FONTOS!
         }
-    }
+    }*/
 }
