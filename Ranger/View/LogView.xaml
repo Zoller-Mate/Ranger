@@ -15,9 +15,7 @@
             <RowDefinition/>
             <RowDefinition Height="45"/>
         </Grid.RowDefinitions>
-        <DataGrid RowStyle="{DynamicResource DataGridRowStyle1}"
-                  ColumnHeaderStyle="{DynamicResource DataGridColumnHeaderStyle1}"
-                  ItemsSource="{Binding Logs}"/>
+        <DataGrid ItemsSource="{Binding Logs}"/>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
             <ComboBox Width="100"
                         ItemsSource="{Binding LogDates}"
