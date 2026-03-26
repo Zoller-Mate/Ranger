@@ -13,17 +13,24 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
-            <RowDefinition Height="45"/>
+            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
         <DataGrid ItemsSource="{Binding Logs}"
                   ColumnWidth="*"/>
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <ComboBox Width="100"
-                        ItemsSource="{Binding LogDates}"
-                        SelectedItem="{Binding SelectedLogDate}">
+        <StackPanel Grid.Row="1"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="10"
+                    VerticalAlignment="Center">
+            <ComboBox Width="125"
+                      Style="{StaticResource ModernComboBox}"
+                      ItemsSource="{Binding LogDates}"
+                      SelectedItem="{Binding SelectedLogDate}">
             </ComboBox>
-            <Button Content="Refresh" Command="{Binding LoadLogDatesCommand}"/>
-            <Button Content="Save as" Command="{Binding LogsSaveAsCommand}"/>
+            <Button Content="Refresh" Command="{Binding LoadLogDatesCommand}" Style="{StaticResource SecondaryButton}"
+            Margin="10,0,0,0"/>
+            <Button Content="Save as" Command="{Binding LogsSaveAsCommand}" Style="{StaticResource PrimaryButton}"
+            Margin="10,0,0,0"/>
         </StackPanel>
     </Grid>
 </UserControl>

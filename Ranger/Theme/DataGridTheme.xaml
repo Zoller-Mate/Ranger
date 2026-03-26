@@ -61,6 +61,7 @@
     <Style TargetType="DataGridCell">
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="Padding" Value="10,4"/>
+        <Setter Property="TextBlock.VerticalAlignment" Value="Center"/>
     </Style>
 
 

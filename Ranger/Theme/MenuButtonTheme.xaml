@@ -1,51 +1,73 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Style BasedOn="{StaticResource {x:Type ToggleButton}}"
-        TargetType="{x:Type RadioButton}"
-        x:Key="MenuButtonTheme">
-        <Style.Setters>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border BorderBrush="{TemplateBinding BorderBrush}"
-                             BorderThickness="3,0,0,0"
-                             Background="{TemplateBinding Background}"
-                             Margin="3">
+    <!-- COLORS (illeszkedik a meglévőhöz) -->
+    <SolidColorBrush x:Key="MenuBg" Color="Transparent"/>
+    <SolidColorBrush x:Key="MenuHover" Color="#EEF2F7"/>
+    <SolidColorBrush x:Key="MenuActiveBg" Color="#E5EAF0"/>
+    <SolidColorBrush x:Key="MenuActiveBorder" Color="#3B82F6"/>
+    <SolidColorBrush x:Key="MenuText" Color="#1F2937"/>
 
-                            <TextBlock Text="{TemplateBinding Property=Content}"
-                                     VerticalAlignment="Center"
-                                     HorizontalAlignment="Center"
-                                     Margin="10"
-                                     FontSize="20"
-                                     />
+    <Style x:Key="MenuButtonTheme"
+           TargetType="RadioButton">
 
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
+        <Setter Property="Foreground" Value="{StaticResource MenuText}"/>
+        <Setter Property="Background" Value="{StaticResource MenuBg}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Cursor" Value="Hand"/>
 
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="0"
+                            CornerRadius="8"
+                            Padding="12,8"
+                            Margin="4">
 
-        </Style.Setters>
+                        <TextBlock Text="{TemplateBinding Content}"
+                                   VerticalAlignment="Center"
+                                   HorizontalAlignment="Center"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"/>
+                    </Border>
 
-        <Style.Triggers>
-            <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Background">
-                    <Setter.Value>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,2">
-                            <GradientStop Color="LightBlue" Offset="0"/>
-                            <GradientStop Color="Transparent" Offset="0.9"/>
-                        </LinearGradientBrush>
-                    </Setter.Value>
-                </Setter>
-                <Setter Property="BorderBrush" Value="#4287f5"/>
-            </Trigger>
+                    <ControlTemplate.Triggers>
 
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="BorderBrush" Value="#4287f5"/>
-            </Trigger>
-        </Style.Triggers>
+                        <!-- HOVER -->
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd"
+                                    Property="Background"
+                                    Value="{StaticResource MenuHover}"/>
+                        </Trigger>
+
+                        <!-- ACTIVE -->
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bd"
+                                    Property="Background"
+                                    Value="{StaticResource MenuActiveBg}"/>
+
+                            <!-- subtle accent line -->
+                            <Setter TargetName="Bd"
+                                    Property="BorderBrush"
+                                    Value="{StaticResource MenuActiveBorder}"/>
+                            <Setter TargetName="Bd"
+                                    Property="BorderThickness"
+                                    Value="0,0,0,2"/>
+                        </Trigger>
+
+                        <!-- DISABLED -->
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
     </Style>
+
 </ResourceDictionary>
