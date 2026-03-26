@@ -25,20 +25,78 @@ namespace Ranger.Services
             _client.DefaultRequestHeaders.Add("x-dev-password", "gyere_gyere_kismadar");
         }
 
+        public class ApiResult<T>
+        {
+            public bool IsSuccess { get; set; }
+            public T? Data { get; set; }
+            public string? ErrorMessage { get; set; }
+        }
+
+
         public async Task<ApiResponseDto<LogDatesDto>> GetAviableLogDatesAsync() => await GetRequestAsync<LogDatesDto>("dev/logs");
         public async Task<ApiResponseDto<LogsDto>> GetLogsByDateAsync(string date) => await GetRequestAsync<LogsDto>($"dev/logs/{date}");
         public async Task<ApiResponseDto<DatabaseDto>> GetDatabaseDumpAsync() => await GetRequestAsync<DatabaseDto>($"dev/databasedump");
 
-        private async Task<ApiResponseDto<T>> GetRequestAsync<T>(string route)
+        private async Task<ApiResult<T>> GetRequestAsync<T>(string route)
         {
-            var response = await _client.GetAsync(route);
-            response.EnsureSuccessStatusCode();
+            try
+            {
+                var response = await _client.GetAsync(route);
 
-            var json = await response.Content.ReadAsStringAsync();
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ApiResult<T>
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = $"HTTP {(int)response.StatusCode}"
+                    };
+                }
 
-            var ASDF = JsonSerializer.Deserialize<ApiResponseDto<T>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? throw new Exception("Invalid API response");
+                var json = await response.Content.ReadAsStringAsync();
 
-            return ASDF;
+                var data = JsonSerializer.Deserialize<ApiResponseDto<T>>(
+                    json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (data == null)
+                {
+                    return new ApiResult<T>
+                    {
+                        IsSuccess = false,
+                        ErrorMessage = "Invalid API response"
+                    };
+                }
+
+                return new ApiResult<T>
+                {
+                    IsSuccess = true,
+                    Data = data.Data // vagy ami nálad a payload
+                };
+            }
+            catch (HttpRequestException)
+            {
+                return new ApiResult<T>
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Nem sikerült csatlakozni a szerverhez"
+                };
+            }
+            catch (TaskCanceledException)
+            {
+                return new ApiResult<T>
+                {
+                    IsSuccess = false,
+                    ErrorMessage = "Timeout"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ApiResult<T>
+                {
+                    IsSuccess = false,
+                    ErrorMessage = ex.Message
+                };
+            }
         }
 
         public void SetStaticApiKey(string password) // ezt még implementálni kell... amikor elindítod az api-t, akkor kelljen megadni a key-t. szól ha nem jó.

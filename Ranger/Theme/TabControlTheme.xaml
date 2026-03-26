@@ -23,7 +23,7 @@
         <Setter Property="Foreground" Value="{StaticResource TabText}"/>
         <Setter Property="FontWeight" Value="SemiBold"/>
         <Setter Property="Padding" Value="14,6"/>
-        <Setter Property="Margin" Value="0,0,4,0"/>
+        <Setter Property="Margin" Value="2,2,4,2"/>
 
         <Setter Property="Template">
             <Setter.Value>
@@ -32,7 +32,7 @@
                             Background="{StaticResource TabItemBg}"
                             BorderBrush="{StaticResource TabBorder}"
                             BorderThickness="0,0,0,1"
-                            CornerRadius="6,6,0,0"
+                            CornerRadius="6,6,6,6"
                             Padding="{TemplateBinding Padding}">
 
                         <ContentPresenter
