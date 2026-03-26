@@ -13,7 +13,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
-            <RowDefinition Height="45"/>
+            <RowDefinition Height="60"/>
         </Grid.RowDefinitions>
         <TabControl ItemsSource="{Binding Tables}"
                     SelectedItem="{Binding SelectedTable}"
@@ -33,9 +33,16 @@
             </TabControl.ContentTemplate>
         </TabControl>
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Refresh" Command="{Binding LoadDatabaseDumpCommand}"/>
-            <Button Content="Save as" Command="{Binding DatabaseSaveAsCommand}"/>
+        <StackPanel Grid.Row="1"
+            Orientation="Horizontal"
+            HorizontalAlignment="Right"
+            Margin="10"
+            VerticalAlignment="Center">
+            
+            <Button Content="Refresh" Command="{Binding LoadDatabaseDumpCommand}" Style="{StaticResource SecondaryButton}"
+            Margin="10,0,0,0"/>
+            <Button Content="Save as" Command="{Binding DatabaseSaveAsCommand}" Style="{StaticResource PrimaryButton}"
+            Margin="10,0,0,0"/>
         </StackPanel>
     </Grid>
 </UserControl>
