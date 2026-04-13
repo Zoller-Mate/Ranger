@@ -20,5 +20,6 @@ namespace Ranger
         {
             InitializeComponent();
         }
+
     }
 }

@@ -1,119 +1,110 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 using Ranger.Dtos;
 using Ranger.Services;
 using System.Collections.ObjectModel;
-using Microsoft.Win32;
 using System.IO;
 using System.Text;
-using System.Windows;
 
 namespace Ranger.ViewModel
 {
     internal partial class LogViewModel : ObservableObject
     {
         private readonly ApiService _apiService = new();
+        private readonly BannerService _banner = BannerService.Instance;
 
-        // ObservableProperty-k
+        public LogViewModel()
+        {
+            _ = InitializeAsync();
+        }
+
         [ObservableProperty]
         private ObservableCollection<string> _logDates = new();
 
         [ObservableProperty]
-        private List<Log> _logs = new(); // Nem kell ObservableCollection mert a lista elemei sosem változnak egyesével. Mindig az egész Objectet változtatjuk, akkor elég az ObservableProperty
+        private List<Log> _logs = new();
 
         [ObservableProperty]
         private string _selectedLogDate = string.Empty;
 
-        // Esemény kezelők
         partial void OnSelectedLogDateChanged(string value)
         {
-            if (value is null)
-                return;
-
-            LoadLogsByDateCommand.Execute(value);
+            if (!string.IsNullOrEmpty(value))
+                LoadLogsByDateCommand.Execute(value);
         }
 
-        // RelayCommand-ok
+        private async Task InitializeAsync()
+        {
+            await LoadLogDatesAsync();
+
+            if (LogDates.Any())
+                SelectedLogDate = LogDates.First();
+        }
+
+        // ================= LOAD =================
         [RelayCommand]
         private async Task LoadLogDatesAsync()
         {
-            var response = await _apiService.GetAviableLogDatesAsync();
+            var result = await _apiService.GetAviableLogDatesAsync();
 
-            if (response.Status != "OK")
+            if (!result.IsSuccess)
+            {
+                await _banner.ShowErrorAsync(result.ErrorMessage ?? "Hiba");
                 return;
+            }
 
-            LogDates = new ObservableCollection<string>(response.Data.Dates);
+            LogDates = new ObservableCollection<string>(result.Data!.Dates);
         }
 
         [RelayCommand]
-        private async Task LoadLogsByDateAsync(string selectedLogDate)
+        private async Task LoadLogsByDateAsync(string date)
         {
-            var response = await _apiService.GetLogsByDateAsync(selectedLogDate);
+            var result = await _apiService.GetLogsByDateAsync(date);
 
-
-            if (response.Status != "OK")
+            if (!result.IsSuccess)
+            {
+                await _banner.ShowErrorAsync(result.ErrorMessage ?? "Hiba");
                 return;
+            }
 
-            Logs = new List<Log>(response.Data.Logs);
+            Logs = new List<Log>(result.Data!.Logs);
         }
 
+        // ================= SAVE =================
         [RelayCommand]
         private async Task LogsSaveAsAsync()
         {
-            // Ellenőrizzük, hogy vannak-e logok
             if (!Logs.Any())
             {
-                MessageBox.Show("No logs to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                await _banner.ShowErrorAsync("Nincs menthető log.");
                 return;
             }
 
-            // SaveFileDialog konfigurálása
-            SaveFileDialog saveLogDialog = new SaveFileDialog
+            var dialog = new SaveFileDialog
             {
-                Filter = "Log files (*.log)|*.log|Text files (*.txt)|*.txt|All files (*.*)|*.*",
-                DefaultExt = "log",
-                FileName = $"{SelectedLogDate}.log" // Alapértelmezett fájlnév a kiválasztott dátum alapján
+                Filter = "Log (*.log)|*.log|Text (*.txt)|*.txt",
+                FileName = $"{SelectedLogDate}.log"
             };
 
-            // Dialog megjelenítése
-            if (saveLogDialog.ShowDialog() == true)
+            if (dialog.ShowDialog() != true)
+                return;
+
+            try
             {
-                try
-                {
-                    // Log objektumok formázása szöveggé
-                    var logLines = Logs.Select(log => FormatLogEntry(log)).ToList();
+                var content = string.Join(
+                    Environment.NewLine,
+                    Logs.Select(l => $"[{l.Timestamp}] [{l.Method}] {l.Path} {l.StatusCode} - {l.ResponseTime}")
+                );
 
-                    // Szöveg összeállítása
-                    var logContent = string.Join(Environment.NewLine, logLines);
+                await File.WriteAllTextAsync(dialog.FileName, content, Encoding.UTF8);
 
-                    // Fájl írása aszinkron módon
-                    await File.WriteAllTextAsync(saveLogDialog.FileName, logContent, Encoding.UTF8);
-
-                    // Sikeres mentés üzenete
-                    MessageBox.Show($"Logs saved successfully to:\n{saveLogDialog.FileName}","Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    // Hiba esetén hibaüzenet
-                    MessageBox.Show($"Error saving file:\n{ex.Message}","Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                await _banner.ShowErrorAsync("Log mentve ✔");
             }
-        }
-
-        private string FormatLogEntry(Log log)
-        {
-            return $"[{log.Timestamp}] [{log.Method}] {log.Path} {log.StatusCode} - {log.ResponseTime}";
-        }
-
-        public LogViewModel()
-        {
-            InitializeAsync();
-        }
-
-        private async void InitializeAsync()
-        {
-            await LoadLogDatesCommand.ExecuteAsync(null);
-            if (LogDates.Any()) SelectedLogDate = LogDates.First();
+            catch (Exception ex)
+            {
+                await _banner.ShowErrorAsync($"Mentési hiba: {ex.Message}");
+            }
         }
     }
 }

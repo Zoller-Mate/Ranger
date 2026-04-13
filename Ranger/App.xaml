@@ -14,6 +14,7 @@
                 <ResourceDictionary Source="/Theme/TabControlTheme.xaml"/>
                 <ResourceDictionary Source="/Theme/ComboBoxTheme.xaml"/>
                 <ResourceDictionary Source="/Theme/ActionButtonTheme.xaml"/>
+                <ResourceDictionary Source="/Theme/BannerTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <DataTemplate DataType="{x:Type viewModel:LogViewModel}">

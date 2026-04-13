@@ -4,13 +4,18 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using Ranger.Services;
 using System.Collections.ObjectModel;
-using System.Windows;
 
 namespace Ranger.ViewModel
 {
     internal partial class DatabaseViewModel : ObservableObject
     {
         private readonly ApiService _apiService = new();
+        private readonly BannerService _banner = BannerService.Instance;
+
+        public DatabaseViewModel()
+        {
+            _ = LoadDatabaseDumpAsync();
+        }
 
         [ObservableProperty]
         private ObservableCollection<object> _tables = new();
@@ -18,41 +23,33 @@ namespace Ranger.ViewModel
         [ObservableProperty]
         private object? _selectedTable;
 
-
-
-
-
+        // ================= LOAD =================
         [RelayCommand]
         private async Task LoadDatabaseDumpAsync()
         {
-            var response = await _apiService.GetDatabaseDumpAsync();
-            
-            if (response.Status != "OK")
+            var result = await _apiService.GetDatabaseDumpAsync();
+
+            if (!result.IsSuccess)
+            {
+                await _banner.ShowErrorAsync(result.ErrorMessage ?? "Hiba történt");
                 return;
+            }
 
             Tables.Clear();
 
-            // Végigmegyünk a DatabaseDto összes property-jén
-            var dataProperties = response.Data.GetType().GetProperties();
+            var dataProperties = result.Data!.GetType().GetProperties();
 
             foreach (var prop in dataProperties)
             {
-                var value = prop.GetValue(response.Data);
+                var value = prop.GetValue(result.Data);
                 if (value == null) continue;
 
                 var listType = value.GetType();
-                /*/ Ellenőrizzük, hogy List<T> típusú-e
-                if (!listType.IsGenericType || listType.GetGenericTypeDefinition() != typeof(List<>))
-                    continue;*/
-
-                // Megszerezzük a lista item típusát (pl. UserDto, CampDto stb.)
                 var itemType = listType.GetGenericArguments()[0];
 
-                // Létrehozzuk a TableViewModel<T> objektumot a megfelelő típussal
                 var tableViewModelType = typeof(TableViewModel<>).MakeGenericType(itemType);
                 var tableViewModel = Activator.CreateInstance(tableViewModelType);
 
-                // Beállítjuk a property-ket
                 tableViewModelType.GetProperty("TableName")?.SetValue(tableViewModel, prop.Name);
                 tableViewModelType.GetProperty("Rows")?.SetValue(tableViewModel, value);
 
@@ -62,36 +59,35 @@ namespace Ranger.ViewModel
             SelectedTable = Tables.FirstOrDefault();
         }
 
+        // ================= SAVE =================
         [RelayCommand]
         private async Task DatabaseSaveAsAsync()
         {
             if (!Tables.Any())
             {
-                MessageBox.Show("No database tables to save!", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                await _banner.ShowErrorAsync("Nincs menthető adat.");
                 return;
             }
 
-            SaveFileDialog saveDialog = new SaveFileDialog
+            var dialog = new SaveFileDialog
             {
-                Filter = "Excel files (*.xlsx)|*.xlsx",
-                DefaultExt = "xlsx",
-                FileName = $"database_dump_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.xlsx"
+                Filter = "Excel (*.xlsx)|*.xlsx",
+                FileName = $"database_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.xlsx"
             };
 
-            if (saveDialog.ShowDialog() == true)
+            if (dialog.ShowDialog() != true)
+                return;
+
+            try
             {
-                try
-                {
-                    await SaveAsExcelAsync(saveDialog.FileName);
-                    MessageBox.Show($"Database saved successfully to:\n{saveDialog.FileName}","Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error saving file:\n{ex.Message}","Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                await SaveAsExcelAsync(dialog.FileName);
+                await _banner.ShowErrorAsync("Sikeres mentés ✔"); // (igen, most error színnel – lásd lent)
+            }
+            catch (Exception ex)
+            {
+                await _banner.ShowErrorAsync($"Mentési hiba: {ex.Message}");
             }
         }
-        
 
         private async Task SaveAsExcelAsync(string fileName)
         {
@@ -104,55 +100,35 @@ namespace Ranger.ViewModel
                     var tableName = table.GetType().GetProperty("TableName")?.GetValue(table) as string;
                     var rows = table.GetType().GetProperty("Rows")?.GetValue(table);
 
-                    if (!string.IsNullOrEmpty(tableName) && rows != null)
+                    if (string.IsNullOrEmpty(tableName) || rows == null) continue;
+
+                    var ws = workbook.Worksheets.Add(GetSafeSheetName(tableName));
+
+                    if (rows is IEnumerable<object> data)
                     {
-                        // Érvényes munkalap név biztosítása (Excel korlátok miatt)
-                        var safeSheetName = GetSafeSheetName(tableName);
-                        var worksheet = workbook.Worksheets.Add(safeSheetName);
+                        var list = data.ToList();
+                        if (!list.Any()) continue;
 
-                        if (rows is IEnumerable<object> enumerable)
+                        var props = list.First().GetType().GetProperties();
+
+                        for (int i = 0; i < props.Length; i++)
                         {
-                            var rowList = enumerable.ToList();
-                            if (rowList.Any())
-                            {
-                                // Header sor
-                                var firstRow = rowList.First();
-                                var properties = firstRow.GetType().GetProperties();
-
-                                for (int i = 0; i < properties.Length; i++)
-                                {
-                                    worksheet.Cell(1, i + 1).Value = properties[i].Name;
-                                    worksheet.Cell(1, i + 1).Style.Font.Bold = true;
-                                    worksheet.Cell(1, i + 1).Style.Fill.BackgroundColor = XLColor.LightGray;
-                                }
-
-                                // Adat sorok
-                                int currentRow = 2;
-                                foreach (var row in rowList)
-                                {
-                                    for (int i = 0; i < properties.Length; i++)
-                                    {
-                                        var value = properties[i].GetValue(row);
-                                        worksheet.Cell(currentRow, i + 1).Value = value?.ToString() ?? "";
-                                    }
-                                    currentRow++;
-                                }
-
-                                // Auto-fit oszlopok
-                                worksheet.ColumnsUsed().AdjustToContents();
-                            }
-                            else
-                            {
-                                worksheet.Cell(1, 1).Value = "";
-                            }
+                            ws.Cell(1, i + 1).Value = props[i].Name;
+                            ws.Cell(1, i + 1).Style.Font.Bold = true;
                         }
-                    }
-                }
 
-                // Ha nincs adat, adj hozzá egy üres lapot
-                if (!workbook.Worksheets.Any())
-                {
-                    workbook.Worksheets.Add("Empty");
+                        int r = 2;
+                        foreach (var row in list)
+                        {
+                            for (int i = 0; i < props.Length; i++)
+                            {
+                                ws.Cell(r, i + 1).Value = props[i].GetValue(row)?.ToString();
+                            }
+                            r++;
+                        }
+
+                        ws.ColumnsUsed().AdjustToContents();
+                    }
                 }
 
                 workbook.SaveAs(fileName);
@@ -161,37 +137,21 @@ namespace Ranger.ViewModel
 
         private string GetSafeSheetName(string name)
         {
-            // Excel munkalap név korlátok: max 31 karakter, nem tartalmazhat: \ / ? * [ ]
-            var safeName = name;
-            var invalidChars = new char[] { '\\', '/', '?', '*', '[', ']', ':' };
+            var invalid = new char[] { '\\', '/', '?', '*', '[', ']', ':' };
 
-            foreach (var c in invalidChars)
-            {
-                safeName = safeName.Replace(c, '_');
-            }
+            foreach (var c in invalid)
+                name = name.Replace(c, '_');
 
-            if (safeName.Length > 31)
-                safeName = safeName.Substring(0, 31);
-
-            return safeName;
+            return name.Length > 31 ? name[..31] : name;
         }
-
-
-        public DatabaseViewModel()
-        {
-            LoadDatabaseDumpCommand.ExecuteAsync(null);
-        }
-
     }
 
-    // Egy tábla
     internal partial class TableViewModel<T> : ObservableObject
     {
         [ObservableProperty]
         private string _tableName = string.Empty;
 
-        // List elég, mert mindig az egész objektet cseréljük, nem módosítjuk egyesével az elemeket
         [ObservableProperty]
-        private List<T> _rows = new List<T>();
+        private List<T> _rows = new();
     }
 }

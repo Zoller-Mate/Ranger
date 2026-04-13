@@ -1,108 +1,142 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using DocumentFormat.OpenXml.Spreadsheet;
 using Ranger.Dtos;
 
 namespace Ranger.Services
 {
     internal class ApiService
     {
-
         private readonly HttpClient _client;
 
         public ApiService()
         {
             _client = new HttpClient
             {
-                BaseAddress = new Uri("http://ranger.zoller.dev/api/v0/"),
+                BaseAddress = new Uri("http://ranger.zoller.dev/api/v0/")
             };
+
             _client.DefaultRequestHeaders.Add("x-dev-password", "gyere_gyere_kismadar");
         }
 
+        // ===== RESULT WRAPPER =====
         public class ApiResult<T>
         {
             public bool IsSuccess { get; set; }
             public T? Data { get; set; }
-            public string? ErrorMessage { get; set; }
+            public string ErrorMessage { get; set; } = "";
         }
 
+        // ===== PUBLIC METHODS =====
+        public Task<ApiResult<LogDatesDto>> GetAviableLogDatesAsync()
+            => GetRequestAsync<LogDatesDto>("dev/logs");
 
-        public async Task<ApiResponseDto<LogDatesDto>> GetAviableLogDatesAsync() => await GetRequestAsync<LogDatesDto>("dev/logs");
-        public async Task<ApiResponseDto<LogsDto>> GetLogsByDateAsync(string date) => await GetRequestAsync<LogsDto>($"dev/logs/{date}");
-        public async Task<ApiResponseDto<DatabaseDto>> GetDatabaseDumpAsync() => await GetRequestAsync<DatabaseDto>($"dev/databasedump");
+        public Task<ApiResult<LogsDto>> GetLogsByDateAsync(string date)
+            => GetRequestAsync<LogsDto>($"dev/logs/{date}");
 
+        public Task<ApiResult<DatabaseDto>> GetDatabaseDumpAsync()
+            => GetRequestAsync<DatabaseDto>("dev/databasedump");
+
+
+        // ===== CORE REQUEST HANDLER =====
         private async Task<ApiResult<T>> GetRequestAsync<T>(string route)
         {
             try
             {
                 var response = await _client.GetAsync(route);
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    return new ApiResult<T>
-                    {
-                        IsSuccess = false,
-                        ErrorMessage = $"HTTP {(int)response.StatusCode}"
-                    };
-                }
-
                 var json = await response.Content.ReadAsStringAsync();
 
-                var data = JsonSerializer.Deserialize<ApiResponseDto<T>>(
-                    json,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (data == null)
+                // ===== SUCCESS =====
+                if (response.IsSuccessStatusCode)
                 {
+                    var apiResponse = JsonSerializer.Deserialize<ApiResponseDto<T>>(
+                        json,
+                        new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        });
+
+                    if (apiResponse == null)
+                    {
+                        return Fail<T>("Invalid API response");
+                    }
+
                     return new ApiResult<T>
                     {
-                        IsSuccess = false,
-                        ErrorMessage = "Invalid API response"
+                        IsSuccess = true,
+                        Data = apiResponse.Data
                     };
                 }
 
-                return new ApiResult<T>
-                {
-                    IsSuccess = true,
-                    Data = data.Data // vagy ami nálad a payload
-                };
+                // ===== ERROR (HTTP != 2xx) =====
+                var errorMessage = ExtractErrorMessage(json);
+
+                return Fail<T>($"HTTP {(int)response.StatusCode}: {errorMessage}");
             }
             catch (HttpRequestException)
             {
-                return new ApiResult<T>
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Nem sikerült csatlakozni a szerverhez"
-                };
+                return Fail<T>("Nem sikerült csatlakozni a szerverhez.");
             }
             catch (TaskCanceledException)
             {
-                return new ApiResult<T>
-                {
-                    IsSuccess = false,
-                    ErrorMessage = "Timeout"
-                };
+                return Fail<T>("A kérés timeoutolt.");
             }
             catch (Exception ex)
             {
-                return new ApiResult<T>
-                {
-                    IsSuccess = false,
-                    ErrorMessage = ex.Message
-                };
+                return Fail<T>($"Unexpected error: {ex.Message}");
             }
         }
 
-        public void SetStaticApiKey(string password) // ezt még implementálni kell... amikor elindítod az api-t, akkor kelljen megadni a key-t. szól ha nem jó.
+
+        // ===== ERROR PARSER =====
+        private string ExtractErrorMessage(string json)
         {
-                _client.DefaultRequestHeaders.Remove("x-dev-password");
-                _client.DefaultRequestHeaders.Add("x-dev-password", password);
+            if (string.IsNullOrWhiteSpace(json))
+                return "Unknown error";
+
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                // common patterns
+                if (root.TryGetProperty("message", out var message))
+                    return message.GetString() ?? "Unknown error";
+
+                if (root.TryGetProperty("error", out var error))
+                    return error.GetString() ?? "Unknown error";
+
+                if (root.TryGetProperty("title", out var title))
+                    return title.GetString() ?? "Unknown error";
+
+                // fallback
+                return json;
+            }
+            catch
+            {
+                return json; // nem JSON → raw text
+            }
+        }
+
+
+        // ===== HELPER =====
+        private ApiResult<T> Fail<T>(string message)
+        {
+            return new ApiResult<T>
+            {
+                IsSuccess = false,
+                ErrorMessage = message
+            };
+        }
+
+
+        // ===== API KEY =====
+        public void SetStaticApiKey(string password)
+        {
+            _client.DefaultRequestHeaders.Remove("x-dev-password");
+            _client.DefaultRequestHeaders.Add("x-dev-password", password);
         }
     }
 }
