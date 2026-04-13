@@ -6,10 +6,15 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>RangerIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Resources\RangerIcon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="RangerIcon.ico" />
   </ItemGroup>
 
   <ItemGroup>
