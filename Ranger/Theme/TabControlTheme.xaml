@@ -32,7 +32,7 @@
                             Background="{StaticResource TabItemBg}"
                             BorderBrush="{StaticResource TabBorder}"
                             BorderThickness="0,0,0,1"
-                            CornerRadius="6,6,6,6"
+                            CornerRadius="6"
                             Padding="{TemplateBinding Padding}">
 
                         <ContentPresenter

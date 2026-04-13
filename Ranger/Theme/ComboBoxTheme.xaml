@@ -1,7 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <!-- ===== COLORS ===== -->
     <SolidColorBrush x:Key="ControlBg" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="ControlBorder" Color="#E5E7EB"/>
     <SolidColorBrush x:Key="ControlHover" Color="#F3F4F6"/>
@@ -23,7 +22,6 @@
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
 
-                        <!-- 🔥 EGYETLEN BORDER -->
                         <Border x:Name="MainBorder"
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
@@ -36,13 +34,11 @@
                                     <ColumnDefinition Width="36"/>
                                 </Grid.ColumnDefinitions>
 
-                                <!-- TEXT -->
                                 <ContentPresenter
                                 Margin="12,0,0,0"
                                 VerticalAlignment="Center"
                                 Content="{TemplateBinding SelectionBoxItem}"/>
 
-                                <!-- ARROW -->
                                 <Grid Grid.Column="1">
                                     <Border Background="Transparent"/>
 
@@ -56,13 +52,15 @@
                             </Grid>
                         </Border>
 
-                        <!-- CLICK AREA -->
                         <ToggleButton x:Name="ToggleButton"
-                                  Background="Transparent"
-                                  BorderThickness="0"
-                                  IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"/>
+                                      IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Background="Transparent"/>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
 
-                        <!-- DROPDOWN -->
                         <Popup x:Name="Popup"
                            Placement="Bottom"
                            IsOpen="{TemplateBinding IsDropDownOpen}"
@@ -85,14 +83,12 @@
 
                     <ControlTemplate.Triggers>
 
-                        <!-- HOVER -->
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="MainBorder"
                                 Property="Background"
                                 Value="{StaticResource ControlHover}"/>
                         </Trigger>
 
-                        <!-- OPEN -->
                         <Trigger Property="IsDropDownOpen" Value="True">
                             <Setter TargetName="MainBorder"
                                 Property="BorderBrush"
