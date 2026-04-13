@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Ranger.Dtos;
+using Ranger.Properties;
 
 namespace Ranger.Services
 {
@@ -12,12 +13,15 @@ namespace Ranger.Services
 
         public ApiService()
         {
+            
             _client = new HttpClient
             {
+                //BaseAddress = new Uri(Settings.Default.ServerAddress)
                 BaseAddress = new Uri("http://ranger.zoller.dev/api/v1/")
             };
 
-            _client.DefaultRequestHeaders.Add("x-dev-password", "gyere_gyere_kismadar");
+            //_client.DefaultRequestHeaders.Add("x-dev-password", "gyere_gyere_kismadar");
+            _client.DefaultRequestHeaders.Add("x-dev-password", Settings.Default.DevApiKey);
         }
 
         // ===== RESULT WRAPPER =====

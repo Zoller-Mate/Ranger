@@ -9,6 +9,7 @@ namespace Ranger.ViewModel
 
         public LogViewModel LogVm { get; set; } = new LogViewModel();
         public DatabaseViewModel databaseVm { get; set; } = new DatabaseViewModel();
+        public SettingsViewModel settingsVm { get; set; } = new SettingsViewModel();
 
 
         [ObservableProperty]
@@ -19,6 +20,8 @@ namespace Ranger.ViewModel
         private void ShowLogView() => CurrentView = LogVm;
         [RelayCommand]
         private void ShowDatabaseView() => CurrentView = databaseVm;
+        [RelayCommand]
+        private void ShowSettingsView() => CurrentView = settingsVm;
 
 
         public MainViewModel()

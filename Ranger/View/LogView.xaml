@@ -10,6 +10,7 @@
     <UserControl.DataContext>
         <viewModel:LogViewModel/>
     </UserControl.DataContext>
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>

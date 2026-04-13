@@ -27,13 +27,17 @@
 
             <StackPanel Margin="6">
                 <RadioButton Content="Log"
-                             IsChecked="True"
+                             Style="{StaticResource MenuButtonTheme}"
                              Command="{Binding ShowLogViewCommand}"
-                             Style="{StaticResource MenuButtonTheme}"/>
+                             IsChecked="True"/>
 
                 <RadioButton Content="Database"
                              Style="{StaticResource MenuButtonTheme}"
                              Command="{Binding ShowDatabaseViewCommand}"/>
+
+                <RadioButton Content="Settings"
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding ShowSettingsViewCommand}"/>
             </StackPanel>
 
             <ContentControl Grid.Column="1"

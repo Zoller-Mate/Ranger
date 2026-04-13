@@ -15,6 +15,8 @@
                 <ResourceDictionary Source="/Theme/ComboBoxTheme.xaml"/>
                 <ResourceDictionary Source="/Theme/ActionButtonTheme.xaml"/>
                 <ResourceDictionary Source="/Theme/BannerTheme.xaml"/>
+                <ResourceDictionary Source="/Theme/TextBoxTheme.xaml"/>
+                <ResourceDictionary Source="/Theme/TextTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <DataTemplate DataType="{x:Type viewModel:LogViewModel}">
@@ -23,6 +25,10 @@
 
             <DataTemplate DataType="{x:Type viewModel:DatabaseViewModel}">
                 <view:DatabaseView/>
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type viewModel:SettingsViewModel}">
+                <view:SettingsView/>
             </DataTemplate>
 
         </ResourceDictionary>
