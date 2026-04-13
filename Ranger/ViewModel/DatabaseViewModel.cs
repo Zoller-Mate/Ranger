@@ -81,7 +81,7 @@ namespace Ranger.ViewModel
             try
             {
                 await SaveAsExcelAsync(dialog.FileName);
-                await _banner.ShowErrorAsync("Sikeres mentés ✔"); // (igen, most error színnel – lásd lent)
+                await _banner.ShowSuccessAsync("Sikeres mentés ✔");
             }
             catch (Exception ex)
             {

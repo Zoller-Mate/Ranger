@@ -14,14 +14,28 @@ namespace Ranger.Services
         [ObservableProperty]
         private bool isVisible;
 
+        [ObservableProperty]
+        private bool isError;
+
         private BannerService() { }
 
         public async Task ShowErrorAsync(string message)
         {
             Message = message;
+            IsError = true;
             IsVisible = true;
 
-            // auto hide 4 sec után
+            await Task.Delay(4000);
+
+            IsVisible = false;
+        }
+
+        public async Task ShowSuccessAsync(string message)
+        {
+            Message = message;
+            IsError = false;
+            IsVisible = true;
+
             await Task.Delay(4000);
 
             IsVisible = false;

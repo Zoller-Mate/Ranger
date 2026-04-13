@@ -99,7 +99,7 @@ namespace Ranger.ViewModel
 
                 await File.WriteAllTextAsync(dialog.FileName, content, Encoding.UTF8);
 
-                await _banner.ShowErrorAsync("Log mentve ✔");
+                await _banner.ShowSuccessAsync("Sikeres mentés ✔");
             }
             catch (Exception ex)
             {

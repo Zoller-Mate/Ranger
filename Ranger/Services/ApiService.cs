@@ -14,7 +14,7 @@ namespace Ranger.Services
         {
             _client = new HttpClient
             {
-                BaseAddress = new Uri("http://ranger.zoller.dev/api/v0/")
+                BaseAddress = new Uri("http://ranger.zoller.dev/api/v1/")
             };
 
             _client.DefaultRequestHeaders.Add("x-dev-password", "gyere_gyere_kismadar");

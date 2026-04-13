@@ -2,17 +2,18 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- COLORS -->
-    <SolidColorBrush x:Key="BannerBg" Color="#EF4444"/>
+    <SolidColorBrush x:Key="BannerErrorBg" Color="#EF4444"/>
+    <SolidColorBrush x:Key="BannerSuccessBg" Color="#10B981"/>
     <SolidColorBrush x:Key="BannerText" Color="White"/>
 
-    <!-- STYLE -->
-    <Style x:Key="BannerStyle" TargetType="Border">
-        <Setter Property="Background" Value="{StaticResource BannerBg}"/>
-        <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Padding" Value="16,10"/>
-        <Setter Property="Margin" Value="16"/>
-        <Setter Property="VerticalAlignment" Value="Bottom"/>
+    <!-- =========================
+         BANNER STYLE (FIXED)
+         ========================= -->
+    <Style x:Key="BannerStyle" TargetType="ContentControl">
+
         <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Bottom"/>
+        <Setter Property="Margin" Value="16"/>
         <Setter Property="Opacity" Value="0"/>
 
         <Setter Property="RenderTransform">
@@ -21,19 +22,48 @@
             </Setter.Value>
         </Setter>
 
+        <!-- TEMPLATE -->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContentControl">
+
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="10"
+                            Padding="14,10">
+
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"/>
+                    </Border>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+        <Setter Property="Background"
+                Value="{StaticResource BannerErrorBg}"/>
+
         <Style.Triggers>
+
+            <!-- SUCCESS -->
+            <DataTrigger Binding="{Binding IsError}" Value="False">
+                <Setter Property="Background"
+                        Value="{StaticResource BannerSuccessBg}"/>
+            </DataTrigger>
 
             <!-- SHOW -->
             <DataTrigger Binding="{Binding IsVisible}" Value="True">
+
                 <DataTrigger.EnterActions>
                     <BeginStoryboard>
                         <Storyboard>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="Opacity"
-                                To="1" Duration="0:0:0.2"/>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
-                                To="0" Duration="0:0:0.2"/>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                             To="1"
+                                             Duration="0:0:0.2"/>
+
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                                             To="0"
+                                             Duration="0:0:0.2"/>
                         </Storyboard>
                     </BeginStoryboard>
                 </DataTrigger.EnterActions>
@@ -41,18 +71,21 @@
                 <DataTrigger.ExitActions>
                     <BeginStoryboard>
                         <Storyboard>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="Opacity"
-                                To="0" Duration="0:0:0.2"/>
-                            <DoubleAnimation
-                                Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
-                                To="40" Duration="0:0:0.2"/>
+                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                             To="0"
+                                             Duration="0:0:0.2"/>
+
+                            <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
+                                             To="40"
+                                             Duration="0:0:0.2"/>
                         </Storyboard>
                     </BeginStoryboard>
                 </DataTrigger.ExitActions>
+
             </DataTrigger>
 
         </Style.Triggers>
+
     </Style>
 
 </ResourceDictionary>

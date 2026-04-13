@@ -4,18 +4,21 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ranger"
-        mc:Ignorable="d"
         xmlns:viewModel="clr-namespace:Ranger.ViewModel"
         xmlns:services="clr-namespace:Ranger.Services"
-        Title="Ranger Desktop" Height="500" Width="800"
+        mc:Ignorable="d"
+        Title="Ranger Desktop"
+        Height="500" Width="800"
         MinHeight="400" MinWidth="600"
         Icon="pack://application:,,,/Resources/RangerIcon.ico">
 
     <Window.DataContext>
         <viewModel:MainViewModel/>
     </Window.DataContext>
+
     <Grid>
 
+        <!-- ================= MAIN APP ================= -->
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
@@ -24,28 +27,35 @@
 
             <StackPanel Margin="6">
                 <RadioButton Content="Log"
-                          IsChecked="True"
-                          Command="{Binding ShowLogViewCommand}"
-                          Style="{StaticResource MenuButtonTheme}"></RadioButton>
+                             IsChecked="True"
+                             Command="{Binding ShowLogViewCommand}"
+                             Style="{StaticResource MenuButtonTheme}"/>
+
                 <RadioButton Content="Database"
-						     Style="{StaticResource MenuButtonTheme}"
-						     Command="{Binding ShowDatabaseViewCommand}"></RadioButton>
+                             Style="{StaticResource MenuButtonTheme}"
+                             Command="{Binding ShowDatabaseViewCommand}"/>
             </StackPanel>
 
             <ContentControl Grid.Column="1"
-                         Margin="5"
-                         Content="{Binding CurrentView}"/>
+                            Margin="5"
+                            Content="{Binding CurrentView}"/>
         </Grid>
 
-        <!-- 🔥 BANNER OVERLAY -->
-        <Border Style="{StaticResource BannerStyle}"
-            DataContext="{x:Static services:BannerService.Instance}">
+        <!-- ================= BANNER OVERLAY ================= -->
+        <Grid Panel.ZIndex="999">
 
-            <TextBlock Text="{Binding Message}"
-                   Foreground="White"
-                   FontSize="14"
-                   FontWeight="SemiBold"
-                   TextWrapping="Wrap"/>
-        </Border>
+            <ContentControl Style="{StaticResource BannerStyle}"
+                DataContext="{x:Static services:BannerService.Instance}">
+
+                <TextBlock Text="{Binding Message}"
+               Foreground="{StaticResource BannerText}"
+               FontSize="14"
+               FontWeight="SemiBold"
+               TextWrapping="Wrap"/>
+
+            </ContentControl>
+            
+        </Grid>
+        
     </Grid>
 </Window>
