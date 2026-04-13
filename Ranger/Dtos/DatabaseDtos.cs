@@ -16,6 +16,7 @@ namespace Ranger.Dtos
         public string PasswordResetAt { get; set; }
         public bool? Validated { get; set; }
     }
+
     // User online status tábla
     internal class UserOnlineStatusDto
     {
@@ -52,6 +53,7 @@ namespace Ranger.Dtos
     internal class ChatDto
     {
         public string Id { get; set; }
+        public string CreatedAt { get; set; }
         public string LastMessageAt { get; set; }
     }
 
@@ -113,7 +115,6 @@ namespace Ranger.Dtos
     {
         public string UserId { get; set; }
         public string Token { get; set; }
-        public string ClientDeviceType { get; set; }
     }
 
     // Locations tábla
