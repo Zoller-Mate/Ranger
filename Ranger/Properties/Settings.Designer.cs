@@ -25,19 +25,7 @@ namespace Ranger.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://ranger.zoller.dev/api/v1/")]
-        public string ServerAddress {
-            get {
-                return ((string)(this["ServerAddress"]));
-            }
-            set {
-                this["ServerAddress"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        [global::System.Configuration.DefaultSettingValueAttribute("password")]
         public string DevApiKey {
             get {
                 return ((string)(this["DevApiKey"]));

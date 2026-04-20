@@ -30,3 +30,4 @@ namespace Ranger.ViewModel
         }
     }
 }
+
